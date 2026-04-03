@@ -41,7 +41,7 @@ pipeline {
         stage('Run App') {
             steps {
                 sh '''
-                $PYTHON app.py  # default numbers use होंगे
+                $PYTHON app.py  # Calculator app runs
                 '''
             }
         }
