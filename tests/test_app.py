@@ -1,20 +1,11 @@
 # tests/test_app.py
-import subprocess
+import unittest
+from app import calculate_sum  # अगर आप app.py में function define करोगे
 
-def test_default_sum():
-    # Run app.py without arguments (uses default 10+20)
-    result = subprocess.run(
-        ["python3", "app.py"],
-        capture_output=True,
-        text=True
-    )
-    assert "Sum = 30" in result.stdout
+class TestCalculator(unittest.TestCase):
+    def test_sum(self):
+        self.assertEqual(calculate_sum(10, 20), 30)
+        self.assertEqual(calculate_sum(15, 25), 40)
 
-def test_custom_sum():
-    # Run app.py with custom numbers 15+25
-    result = subprocess.run(
-        ["python3", "app.py", "15", "25"],
-        capture_output=True,
-        text=True
-    )
-    assert "Sum = 40" in result.stdout
+if __name__ == "__main__":
+    unittest.main()
