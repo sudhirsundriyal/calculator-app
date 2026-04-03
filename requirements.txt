@@ -1,1 +1,8 @@
+# Core requirements
+# (No external libraries needed for basic calculator app)
 
+# Optional packages for testing and development
+pytest==8.3.2           # For automated unit testing
+pytest-cov==4.1.0       # For test coverage reports
+black==24.10.0          # For code formatting
+flake8==7.1.0           # For linting / code quality checks
