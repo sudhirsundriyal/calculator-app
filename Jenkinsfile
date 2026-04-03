@@ -46,7 +46,9 @@ pipeline {
         stage('Run App') {
             steps {
                 sh '''
-                $PYTHON app.py ${NUM1} ${NUM2}
+                NUM1=${NUM1:-10}
+                NUM2=${NUM2:-20}
+                $PYTHON app.py $NUM1 $NUM2
                 '''
             }
         }
@@ -56,15 +58,16 @@ pipeline {
                 echo 'Deploying application (simulation)...'
             }
         }
-    }
+    } // end stages
 
     post {
-    success {
-        echo 'Pipeline completed successfully!'
-        // slackSend channel: '#devops', message: 'Build Successful'
-    }
-    failure {
-        echo 'Pipeline failed.'
-        // slackSend channel: '#devops', message: 'Build Failed'
-    }
-}
+        success {
+            echo 'Pipeline completed successfully!'
+            // slackSend channel: '#devops', message: 'Build Successful'
+        }
+        failure {
+            echo 'Pipeline failed.'
+            // slackSend channel: '#devops', message: 'Build Failed'
+        }
+    } // end post
+} // end pipeline
