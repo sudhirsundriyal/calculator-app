@@ -68,7 +68,16 @@ stage('Build Docker Image') {
         '''
     }
 }
-    
+
+    stage('Deploy to Kubernetes') {
+    steps {
+        echo 'Deploying to Kubernetes...'
+        sh '''
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        '''
+    }
+}
 
     post {
         success {
