@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'NUM1', defaultValue: '10', description: 'First number')
+        string(name: 'NUM2', defaultValue: '20', description: 'Second number')
+    }
+
     environment {
         VENV_DIR = "${env.WORKSPACE}/venv"
         PYTHON = "${env.WORKSPACE}/venv/bin/python"
@@ -37,14 +42,14 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Run App') {
             steps {
-        sh '''
-        $PYTHON app.py 15 25  # Example: override default numbers
-        '''
-      }
-  }
+                sh '''
+                $PYTHON app.py ${NUM1} ${NUM2}
+                '''
+            }
+        }
 
         stage('Deploy') {
             steps {
