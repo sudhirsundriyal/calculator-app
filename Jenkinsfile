@@ -37,6 +37,16 @@ pipeline {
                 '''
             }
         }
+        
+
+    stage('Run App') {
+      steps {
+        sh '''
+        source $VENV_DIR/bin/activate
+        python3 app.py  # अब default values use होंगी
+        '''
+    }
+}    
 
         stage('Deploy') {
             steps {
