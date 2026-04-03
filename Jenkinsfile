@@ -40,11 +40,11 @@ pipeline {
         
         stage('Run App') {
             steps {
-                sh '''
-                $PYTHON app.py  # Calculator app runs
-                '''
-            }
-        }
+        sh '''
+        $PYTHON app.py 15 25  # Example: override default numbers
+        '''
+      }
+  }
 
         stage('Deploy') {
             steps {
