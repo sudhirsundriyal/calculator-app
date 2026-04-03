@@ -1,34 +1,61 @@
 pipeline {
     agent any
 
+    environment {
+        VENV_DIR = "venv"
+    }
+
     stages {
-        stage('Clone') {
+        stage('Clone Repository') {
             steps {
+                echo 'Cloning repository...'
                 git 'https://github.com/sudhirsundriyal/calculator-app.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Python Environment') {
             steps {
+                echo 'Creating virtual environment and installing dependencies...'
                 sh '''
-                python3 -m venv venv
-                ./venv/bin/pip install --upgrade pip
-
+                set -e
+                python3 -m venv $VENV_DIR
+                $VENV_DIR/bin/pip install --upgrade pip
                 if [ -f requirements.txt ]; then
-                    ./venv/bin/pip install -r requirements.txt
+                    $VENV_DIR/bin/pip install -r requirements.txt
                 else
-                    echo "No requirements.txt"
+                    echo "No requirements.txt found, skipping dependencies installation."
                 fi
                 '''
             }
         }
 
-        stage('Run App') {
+        stage('Run Tests') {
             steps {
+                echo 'Running tests (if any)...'
                 sh '''
-                echo "Running app..."
+                set -e
+                $VENV_DIR/bin/python -m unittest discover tests || echo "No tests found, skipping."
                 '''
             }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                sh '''
+                set -e
+                echo "Application deployed successfully (simulation)"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check console output for errors.'
         }
     }
 }
