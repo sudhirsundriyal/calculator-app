@@ -1,18 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: calculator-app
+  name: calculator-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: calculator-app
+      app: calculator
   template:
     metadata:
       labels:
-        app: calculator-app
+        app: calculator
     spec:
       containers:
       - name: calculator
-        image: <YOUR_DOCKER_USERNAME>/calculator-app:latest
-        args: ["10", "20"] # optional: override default numbers
+        image: sudhirsundriyal/calculator-app:latest
+        ports:
+        - containerPort: 80
