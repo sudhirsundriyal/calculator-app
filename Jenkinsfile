@@ -69,6 +69,18 @@ stage('Build Docker Image') {
     }
 }
 
+stage('Build Docker Image') {
+  steps {
+    sh 'docker build -t calculator-app .'
+  }
+}
+
+stage('Run Docker Container') {
+  steps {
+    sh 'docker run --rm calculator-app'
+  }
+}
+    
     stage('Deploy to Kubernetes') {
     steps {
         echo 'Deploying to Kubernetes...'
