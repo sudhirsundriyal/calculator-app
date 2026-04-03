@@ -2,10 +2,21 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = "venv"
+        WORK_DIR = "${env.WORKSPACE}"
+        VENV_DIR = "${env.WORKSPACE}/venv"
+        PYTHON = "${env.WORKSPACE}/venv/bin/python"
+        PIP = "${env.WORKSPACE}/venv/bin/pip"
     }
 
     stages {
+        stage('Workspace Info') {
+            steps {
+                echo "Workspace: ${WORK_DIR}"
+                sh 'pwd'
+                sh 'ls -la'
+            }
+        }
+
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository...'
@@ -17,11 +28,10 @@ pipeline {
             steps {
                 echo 'Creating virtual environment and installing dependencies...'
                 sh '''
-                set -e
                 python3 -m venv $VENV_DIR
-                $VENV_DIR/bin/pip install --upgrade pip
+                $PIP install --upgrade pip
                 if [ -f requirements.txt ]; then
-                    $VENV_DIR/bin/pip install -r requirements.txt
+                    $PIP install -r requirements.txt
                 else
                     echo "No requirements.txt found, skipping dependencies installation."
                 fi
@@ -33,18 +43,21 @@ pipeline {
             steps {
                 echo 'Running tests (if any)...'
                 sh '''
-                set -e
-                $VENV_DIR/bin/python -m unittest discover tests || echo "No tests found, skipping."
+                if [ -d tests ]; then
+                    $PYTHON -m unittest discover tests
+                else
+                    echo "No tests folder found, skipping tests."
+                fi
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
+                echo 'Deploying application (simulation)...'
                 sh '''
-                set -e
-                echo "Application deployed successfully (simulation)"
+                # Example: Run your app or copy files to server
+                echo "Application deployed successfully"
                 '''
             }
         }
