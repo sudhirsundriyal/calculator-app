@@ -60,6 +60,16 @@ pipeline {
         }
     } // end stages
 
+stage('Build Docker Image') {
+    steps {
+        echo 'Building Docker image...'
+        sh '''
+        docker build -t sudhirsundriyal/calculator-app:latest .
+        '''
+    }
+}
+    
+
     post {
         success {
             echo 'Pipeline completed successfully!'
