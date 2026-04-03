@@ -18,11 +18,11 @@ pipeline {
         }
 
         stage('Clone Repository') {
-            steps {
-                echo 'Cloning repository...'
-                git 'https://github.com/sudhirsundriyal/calculator-app.git'
-            }
-        }
+    steps {
+        echo 'Cloning repository...'
+        git branch: 'main', url: 'https://github.com/sudhirsundriyal/calculator-app.git'
+    }
+}
 
         stage('Setup Python Environment') {
             steps {
