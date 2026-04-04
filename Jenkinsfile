@@ -10,8 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/sudhirsundriyal/calculator-app.git',
-                    credentialsId: 'github-token'
+                    url: 'https://github.com/sudhirsundriyal/calculator-app.git'
             }
         }
 
@@ -43,18 +42,17 @@ pipeline {
             }
         }
 
-stage('Push Docker Image') {
-    steps {
-        sh """
-        echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
-        docker push ${DOCKER_IMAGE}
-        """
-    }
-    environment {
-        DOCKER_HUB_USERNAME = credentials('docker-hub-username') // Docker Hub username
-        DOCKER_HUB_PASSWORD = credentials('docker-hub-password') // Docker Hub password or token
-    }
-}
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push sudhirsundriyal/calculator-app:latest
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
@@ -65,8 +63,6 @@ stage('Push Docker Image') {
         }
     }
 
-    
-    
     post {
         success {
             echo 'Pipeline completed successfully!'
