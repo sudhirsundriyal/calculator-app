@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'sudhirsundriyal/calculator-app:latest'
         K8S_CONTEXT = 'kind-calculator'
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
     stages {
@@ -42,30 +43,32 @@ pipeline {
             }
         }
 
-     stage('Push Docker Image') {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'docker-hub',
-            usernameVariable: 'DOCKER_USER',
-            passwordVariable: 'DOCKER_PASS'
-        )]) {
-            sh '''
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push sudhirsundriyal/calculator-app:latest
-            '''
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push $DOCKER_IMAGE
+                    '''
+                }
+            }
         }
-    }
-}
 
-    stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-        export KUBECONFIG=/var/lib/jenkins/.kube/config
-        kubectl config get-contexts
-        kubectl --context kind-calculator apply -f k8s/deployment.yaml
-        '''
-    }
-}
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                if [ -f k8s/deployment.yaml ]; then
+                    kubectl --context ${K8S_CONTEXT} apply -f k8s/deployment.yaml
+                else
+                    echo "Warning: k8s/deployment.yaml not found, skipping deployment."
+                fi
+                '''
+            }
+        }
     }
 
     post {
