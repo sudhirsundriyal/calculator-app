@@ -1,15 +1,9 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'NUM1', defaultValue: '10', description: 'First number')
-        string(name: 'NUM2', defaultValue: '20', description: 'Second number')
-    }
-
     environment {
-        VENV_DIR = "${env.WORKSPACE}/venv"
-        PYTHON = "${env.WORKSPACE}/venv/bin/python"
-        PIP = "${env.WORKSPACE}/venv/bin/pip"
+        DOCKER_IMAGE = 'sudhirsundriyal/calculator-app:latest'
+        K8S_CONTEXT = 'kind-calculator'
     }
 
     stages {
@@ -24,10 +18,10 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                python3 -m venv $VENV_DIR
-                $PIP install --upgrade pip
+                python3 -m venv venv
+                ./venv/bin/pip install --upgrade pip
                 if [ -f requirements.txt ]; then
-                    $PIP install -r requirements.txt
+                    ./venv/bin/pip install -r requirements.txt
                 fi
                 '''
             }
@@ -37,68 +31,40 @@ pipeline {
             steps {
                 sh '''
                 if [ -d tests ]; then
-                    $PYTHON -m unittest discover tests
+                    ./venv/bin/python -m unittest discover tests
                 fi
                 '''
             }
         }
 
-        stage('Run App') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                NUM1=${NUM1:-10}
-                NUM2=${NUM2:-20}
-                $PYTHON app.py $NUM1 $NUM2
-                '''
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
-        stage('Deploy') {
+        stage('Push Docker Image') {
             steps {
-                echo 'Deploying application (simulation)...'
+                sh "docker push ${DOCKER_IMAGE}"
             }
         }
-    } // end stages
 
-stage('Build Docker Image') {
-    steps {
-        echo 'Building Docker image...'
-        sh '''
-        docker build -t sudhirsundriyal/calculator-app:latest .
-        '''
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh """
+                kubectl --context ${K8S_CONTEXT} apply -f k8s/deployment.yaml
+                kubectl --context ${K8S_CONTEXT} apply -f k8s/service.yaml
+                """
+            }
+        }
     }
-}
-
-stage('Build Docker Image') {
-  steps {
-    sh 'docker build -t calculator-app .'
-  }
-}
-
-stage('Run Docker Container') {
-  steps {
-    sh 'docker run --rm calculator-app'
-  }
-}
-    
-    stage('Deploy to Kubernetes') {
-    steps {
-        echo 'Deploying to Kubernetes...'
-        sh '''
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-        '''
-    }
-}
 
     post {
         success {
             echo 'Pipeline completed successfully!'
-            // slackSend channel: '#devops', message: 'Build Successful'
         }
         failure {
             echo 'Pipeline failed.'
-            // slackSend channel: '#devops', message: 'Build Failed'
         }
-    } // end post
-} // end pipeline
+    }
+}
