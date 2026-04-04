@@ -1,12 +1,21 @@
-def calculate_sum(a, b):
-    return a + b
+# app.py
+from flask import Flask, jsonify, request
 
-if __name__ == "__main__":
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    # Numbers from command-line arguments
     import sys
-    if len(sys.argv) == 3:
+    try:
         a = int(sys.argv[1])
         b = int(sys.argv[2])
-    else:
-        a, b = 10, 20
-    print("Calculator app is running...")
-    print(f"Sum = {calculate_sum(a, b)}")
+    except (IndexError, ValueError):
+        a = 10
+        b = 20
+    sum_result = a + b
+    return jsonify({"message": "Calculator app is running...", "sum": sum_result})
+
+if __name__ == '__main__':
+    # Bind on all interfaces so container is accessible externally
+    app.run(host='0.0.0.0', port=80)
