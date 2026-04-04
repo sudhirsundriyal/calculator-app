@@ -57,14 +57,15 @@ pipeline {
     }
 }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh """
-                kubectl --context ${K8S_CONTEXT} apply -f k8s/deployment.yaml
-                kubectl --context ${K8S_CONTEXT} apply -f k8s/service.yaml
-                """
-            }
-        }
+    stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        export KUBECONFIG=/var/lib/jenkins/.kube/config
+        kubectl config get-contexts
+        kubectl --context kind-calculator apply -f k8s/deployment.yaml
+        '''
+    }
+}
     }
 
     post {
