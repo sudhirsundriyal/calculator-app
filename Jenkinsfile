@@ -43,12 +43,18 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                sh "docker push ${DOCKER_IMAGE}"
-            }
-        }
-
+stage('Push Docker Image') {
+    steps {
+        sh """
+        echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+        docker push ${DOCKER_IMAGE}
+        """
+    }
+    environment {
+        DOCKER_HUB_USERNAME = credentials('docker-hub-username') // Docker Hub username
+        DOCKER_HUB_PASSWORD = credentials('docker-hub-password') // Docker Hub password or token
+    }
+}
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
@@ -59,6 +65,8 @@ pipeline {
         }
     }
 
+    
+    
     post {
         success {
             echo 'Pipeline completed successfully!'
