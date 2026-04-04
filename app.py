@@ -1,21 +1,15 @@
-# app.py
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    # Numbers from command-line arguments
-    import sys
-    try:
-        a = int(sys.argv[1])
-        b = int(sys.argv[2])
-    except (IndexError, ValueError):
-        a = 10
-        b = 20
-    sum_result = a + b
-    return jsonify({"message": "Calculator app is running...", "sum": sum_result})
+def calculate_sum(a, b):
+    return a + b
 
-if __name__ == '__main__':
-    # Bind on all interfaces so container is accessible externally
-    app.run(host='0.0.0.0', port=80)
+@app.route('/add', methods=['GET'])
+def add():
+    a = int(request.args.get('a', 0))
+    b = int(request.args.get('b', 0))
+    return jsonify({"result": calculate_sum(a, b)})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
