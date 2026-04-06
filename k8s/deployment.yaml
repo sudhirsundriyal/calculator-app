@@ -16,4 +16,4 @@ spec:
       - name: calculator
         image: sudhirsundriyal/calculator-app:latest
         ports:
-        - containerPort: 80
+        - containerPort: 5000
