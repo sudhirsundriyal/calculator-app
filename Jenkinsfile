@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'sudhirsundriyal/calculator-app:latest'
-        K8S_CONTEXT = 'kind-calculator'
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
@@ -61,11 +60,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                if [ -f k8s/deployment.yaml ]; then
-                    kubectl --context ${K8S_CONTEXT} apply -f k8s/deployment.yaml
-                else
-                    echo "Warning: k8s/deployment.yaml not found, skipping deployment."
-                fi
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
                 '''
             }
         }
