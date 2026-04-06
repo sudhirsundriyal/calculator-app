@@ -7,10 +7,11 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/sudhirsundriyal/calculator-app.git'
+                url: 'https://github.com/sudhirsundriyal/calculator-app.git'
             }
         }
 
@@ -31,6 +32,8 @@ pipeline {
                 sh '''
                 if [ -d tests ]; then
                     ./venv/bin/python -m unittest discover tests
+                else
+                    echo "No tests folder found, skipping..."
                 fi
                 '''
             }
@@ -38,7 +41,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh '''
+                docker build -t ${DOCKER_IMAGE} .
+                '''
             }
         }
 
@@ -51,7 +56,7 @@ pipeline {
                 )]) {
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push $DOCKER_IMAGE
+                    docker push ${DOCKER_IMAGE}
                     '''
                 }
             }
@@ -60,8 +65,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                kubectl get nodes
                 kubectl apply -f k8s/deployment.yaml
                 kubectl apply -f k8s/service.yaml
+                kubectl get pods
+                kubectl get svc
                 '''
             }
         }
